@@ -3,53 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V89.1</title>
+    <title>ProTrack V89.2</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
         .version-tag { position: absolute; top: 10px; right: 10px; font-size: 11px; color: #3b82f6; font-weight: bold; }
-        
-        /* Navigation stable style V89 */
         .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: #1e293b; display: flex; border-top: 1px solid #475569; z-index: 9999; }
         .nav-item { flex: 1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; cursor: pointer; text-transform: uppercase; }
         .nav-item.active { color: #3b82f6; border-top: 3px solid #3b82f6; background: rgba(59, 130, 246, 0.1); }
-        
         .page { display: none; padding: 15px; width: 100%; }
         .card { background: #1e293b; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
         .card.is-pending { border-left: 6px solid #3b82f6; border-right: 6px solid #3b82f6; }
         .card.is-billed { border: 2px solid #10b981; border-left: 6px solid #10b981; border-right: 6px solid #10b981; background: rgba(16, 185, 129, 0.03); }
-        
         .project-title { color: #facc15; font-size: 20px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 8px; }
         .label { font-size: 11px; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-
-        /* Correction police champ PROJET */
         .input { background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; padding: 10px; width: 100%; font-size: 14px; margin-bottom: 10px; display: block; }
-        
         .btn { background: #2563eb; color: white; padding: 15px; border-radius: 10px; font-weight: bold; border: none; font-size: 16px; width: 100%; margin-top: 5px; cursor: pointer; }
         .btn-sec { background: #475569; padding: 12px 5px; font-size: 10px; color: white; border-radius: 6px; text-align: center; font-weight: bold; flex: 1; border: none; cursor: pointer; text-transform: uppercase; }
-        
         .row-item { border-bottom: 1px solid #334155; padding: 10px 0; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .flex-row { display: flex; gap: 5px; align-items: center; margin-bottom: 10px; }
         .del-btn { color: #ef4444; border: none; background: none; font-size: 18px; cursor: pointer; padding-left: 10px; }
-        
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:10000; padding:15px; align-items:start; overflow-y: auto; }
         textarea { background: #0f172a; color: #10b981; border: 1px solid #475569; width: 100%; height: 250px; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 10px; border-radius: 6px; }
         .top-bar { display: flex; gap: 10px; margin-bottom: 15px; }
         .icon-btn { background: #1e293b; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 22px; border: 1px solid #334155; position: relative; }
         .save-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
-
         .suivi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .suivi-col { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 8px; border: 1px solid #334155; }
-        .suivi-header { font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
-        .suivi-val { font-size: 13px; line-height: 1.4; color: white; }
         .btn-validate { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 12px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="pg0" class="page" style="display:block;">
-        <div class="version-tag">V89.1</div>
+        <div class="version-tag">V89.2</div>
         <div class="top-bar">
             <div class="icon-btn" onclick="openSet()">⚙️</div>
             <div class="icon-btn" onclick="openSave()">
@@ -114,7 +102,6 @@
         var db = JSON.parse(localStorage.getItem('P69S_DATA') || '[]');
         var billed = JSON.parse(localStorage.getItem('P69S_BILL') || '[]');
         var archived = JSON.parse(localStorage.getItem('P69S_ARCH') || '[]');
-        // Association des tarifs aux nouveaux noms
         var rates = JSON.parse(localStorage.getItem('P69S_RT')) || { prod: 25, trajet: 20, "pige montage/démontage": 350, "pige omnes": 300, off: 100 };
         var lastSave = localStorage.getItem('P69S_LSAVE') || new Date().getTime();
 
@@ -133,10 +120,8 @@
             if(!d) return; 
             var s1=toM(document.getElementById('s1').value), e1=toM(document.getElementById('e1').value), s2=toM(document.getElementById('s2').value), e2=toM(document.getElementById('e2').value);
             var newItem = { id: new Date().getTime(), d: d, p: p, t: t, noted: false };
-            
-            // Logique de calcul basée sur les nouveaux noms
             if(t.toLowerCase().includes('pige') || t === 'Jours OFF') {
-                newItem.val = rates[t.toLowerCase()] || 0;
+                newItem.val = rates[t] || 0;
                 newItem.hStr = t; newItem.dur = 0;
             } else {
                 function diff(a, b) { if(a === -1 || b === -1) return 0; let r = b - a; return r < 0 ? r + 1440 : r; }
@@ -166,23 +151,17 @@
                 var card = `<div class="card ${isB ? 'is-billed' : 'is-pending'}"><span class="project-title">${proj}</span><b>TOTAL : ${totVal.toFixed(2)}€</b>${lines}<div class="grid" style="margin-top:10px;"><button class="btn-sec" onclick="tB('${proj}')">STATUT</button><button class="btn-sec" onclick="tA('${proj}')">ARCHIVE</button></div></div>`;
                 isA ? hA += card : hB += card;
                 
-                // PAGE SUIVI AVEC CONDITION PIGES
                 if(!isA) {
-                    let aH=0, dH=0, aP=0, dP=0;
-                    groups[proj].forEach(i => { 
+                    let aVal = 0, dVal = 0, aUnit = "", dUnit = "";
+                    groups[proj].forEach(i => {
                         let isPige = i.t.toLowerCase().includes('pige');
-                        if(i.noted) { isPige ? dP++ : dH+=i.dur; } 
-                        else { isPige ? aP++ : aH+=i.dur; } 
+                        let valToAdd = isPige ? 1 : i.dur;
+                        if(i.noted) { dVal += valToAdd; dUnit = isPige ? "" : "H"; } 
+                        else { aVal += valToAdd; aUnit = isPige ? "" : "H"; }
                     });
                     hS += `<div class="card"><span class="project-title">${proj}</span><div class="suivi-grid">
-                        <div class="suivi-col"><div class="label">À SAISIR</div>
-                            ${aH>0 ? `<b>${aH.toFixed(2)}H</b><br>` : ''}
-                            ${aP>0 ? `<b>${aP}</b>` : ''} 
-                        </div>
-                        <div class="suivi-col"><div class="label">DÉJÀ FAIT</div>
-                            ${dH>0 ? `<b>${dH.toFixed(2)}H</b><br>` : ''}
-                            ${dP>0 ? `<b>${dP}</b>` : ''}
-                        </div>
+                        <div class="suivi-col"><div class="label">À SAISIR</div><b>${aVal.toFixed(aVal % 1 === 0 ? 0 : 2)}${aUnit}</b></div>
+                        <div class="suivi-col"><div class="label">DÉJÀ FAIT</div><b>${dVal.toFixed(dVal % 1 === 0 ? 0 : 2)}${dUnit}</b></div>
                     </div><button class="btn-validate" onclick="markNoted('${proj}', true)">VALIDER TRANSFERT</button></div>`;
                 }
             }
@@ -198,7 +177,7 @@
             let h = ""; for(let k in rates) { h += `<label class="label">${k}</label><input type="number" id="rt-${k}" value="${rates[k]}" class="input">`; }
             document.getElementById('price-inputs').innerHTML = h; document.getElementById('set-modal').style.display = 'flex'; 
         }
-        function closeSet() { for(let k in rates) { rates[k] = parseFloat(document.getElementById('rt-'+k.value.toLowerCase()) || document.getElementById('rt-'+k).value) || 0; } localStorage.setItem('P69S_RT', JSON.stringify(rates)); document.getElementById('set-modal').style.display = 'none'; draw(); }
+        function closeSet() { for(let k in rates) { rates[k] = parseFloat(document.getElementById('rt-'+k).value) || 0; } localStorage.setItem('P69S_RT', JSON.stringify(rates)); document.getElementById('set-modal').style.display = 'none'; draw(); }
         function openSave() { 
             let sel = document.getElementById('export-choice');
             let projs = [...new Set(db.map(it => it.p))];
