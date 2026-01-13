@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V89</title>
+    <title>ProTrack V90</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
@@ -22,6 +22,9 @@
         .hour-tag { color: #3b82f6; font-size: 11px; font-weight: bold; }
 
         .input { background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; padding: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; display: block; }
+        /* Réduction de la taille du texte pour le projet */
+        #in-proj { font-size: 13px; font-weight: bold; }
+        
         .btn { background: #2563eb; color: white; padding: 15px; border-radius: 10px; font-weight: bold; border: none; font-size: 16px; width: 100%; margin-top: 5px; cursor: pointer; }
         .btn-sec { background: #475569; padding: 12px 5px; font-size: 10px; color: white; border-radius: 6px; text-align: center; font-weight: bold; flex: 1; border: none; cursor: pointer; text-transform: uppercase; }
         .btn-del-all { background: #991b1b; color: #fecaca; padding: 12px; border-radius: 6px; font-size: 10px; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 10px; }
@@ -37,12 +40,12 @@
         .top-bar { display: flex; gap: 10px; margin-bottom: 15px; }
         .icon-btn { background: #1e293b; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 22px; border: 1px solid #334155; position: relative; }
         
-        .save-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; border: 1px solid #0f172a; }
+        /* Badge de sauvegarde dynamique */
+        .save-badge { position: absolute; top: -5px; right: -5px; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; border: 1px solid #0f172a; }
 
         .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 13px; color: #3b82f6; font-weight: bold; }
         #bloc3 { display: none; }
 
-        /* Styles Spécifiques Suivi */
         .suivi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .suivi-col { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 8px; }
         .suivi-header { font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
@@ -54,7 +57,7 @@
 <body>
 
     <div id="pg0" class="page" style="display:block;">
-        <div class="version-tag">V89</div>
+        <div class="version-tag">V90</div>
         <div class="top-bar">
             <div class="icon-btn" onclick="openSet()">⚙️</div>
             <div class="icon-btn" onclick="openSave()">
@@ -65,14 +68,14 @@
         <div class="card">
             <div class="grid">
                 <input type="date" id="in-date" class="input">
-                <input type="text" id="in-proj" placeholder="NOM DU PROJET" class="input" list="proj-list" autocomplete="off">
+                <input type="text" id="in-proj" placeholder="PROJET" class="input" list="proj-list" autocomplete="off">
                 <datalist id="proj-list"></datalist>
             </div>
             <select id="in-type" class="input">
                 <option value="Production">Production</option>
                 <option value="Trajet">Trajet</option>
-                <option value="Pose Piges">Pose Piges</option>
-                <option value="Pose Omnes">Pose Omnes</option>
+                <option value="Pige montage/démontage">Pige montage/démontage</option>
+                <option value="Pige Omnes">Pige Omnes</option>
                 <option value="Jours OFF">Jours OFF</option>
             </select>
             <div class="toggle-row">
@@ -152,7 +155,13 @@
         function updateSaveCounter() {
             var diff = new Date().getTime() - lastSave;
             var days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById('save-counter').innerText = days;
+            var badge = document.getElementById('save-counter');
+            badge.innerText = days;
+            
+            // Logique de couleur demandée
+            if(days >= 7) badge.style.background = "#ef4444"; // Rouge
+            else if(days >= 3) badge.style.background = "#f59e0b"; // Orange
+            else badge.style.background = "#3b82f6"; // Bleu (par défaut)
         }
 
         function toggleLong() { document.getElementById('bloc3').style.display = document.getElementById('check-long').checked ? 'block' : 'none'; }
@@ -171,8 +180,9 @@
             var totalMin = 0, hParts = [];
             var newItem = { id: new Date().getTime(), d: d, p: p, t: t, noted: false };
 
-            if(t.indexOf('Pose') > -1 || t === 'Jours OFF') {
-                newItem.val = (t==='Pose Piges') ? rates.piges : (t==='Pose Omnes' ? rates.omnes : rates.off);
+            // Mise à jour des conditions avec les nouveaux libellés
+            if(t.includes('Pige') || t === 'Jours OFF') {
+                newItem.val = (t.includes('montage')) ? rates.piges : (t.includes('Omnes') ? rates.omnes : rates.off);
                 newItem.hStr = t;
                 newItem.dur = 0;
             } else {
@@ -200,7 +210,7 @@
         }
 
         function getStats(projectEntries) {
-            let stats = { a: {}, d: {} }; // a=à saisir, d=déjà saisi
+            let stats = { a: {}, d: {} }; 
             projectEntries.forEach(i => {
                 let cat = i.noted ? 'd' : 'a';
                 stats[cat][i.t] = (stats[cat][i.t] || 0) + (i.dur > 0 ? i.dur : 1);
@@ -213,7 +223,6 @@
             db.forEach(o => { if(!plist.includes(o.p)) plist.push(o.p); });
             document.getElementById('proj-list').innerHTML = plist.map(x => '<option value="'+x+'">').join('');
             
-            // Récent
             var rec = "";
             for(var r=0; r<Math.min(db.length, 3); r++){
                 var o = db[r];
@@ -230,7 +239,6 @@
                 var totVal = 0, lines = "";
                 var sorted = groups[proj].sort((a, b) => new Date(a.d) - new Date(b.d));
                 
-                // BILAN & ARCHIVES
                 sorted.forEach(it => {
                     totVal += it.val;
                     lines += `<div class="row-item"><div style="display:flex; justify-content:space-between; align-items:start;"><div><b>${it.d.split('-').reverse().join('/')}</b><br><span class="type-tag">${it.t}</span> ${it.dur>0?it.dur.toFixed(2)+'H':''}<br><small style="color:#94a3b8">${it.hStr}</small></div><div style="text-align:right; display:flex; align-items:center;"><b style="font-size:14px;">${it.val.toFixed(2)}€</b><button class="del-btn" onclick="del(${it.id})">🗑️</button></div></div></div>`;
@@ -239,10 +247,9 @@
                 var card = `<div class="card ${isB ? 'is-billed' : 'is-pending'}"><span class="project-title">${proj}</span><div style="margin-bottom:10px; font-weight:bold; font-size:18px; color:#fff;">TOTAL : ${totVal.toFixed(2)}€</div>${lines}<div style="display:flex; gap:10px; margin-top:15px;"><button class="btn-sec" onclick="tB('${proj}')">${isB ? 'À FACTURER' : 'FACTURÉ'}</button><button class="btn-sec" onclick="tA('${proj}')">${isA ? 'RÉACTIVER' : 'ARCHIVER'}</button></div>${isA ? `<button class="btn-del-all" onclick="delProject('${proj}')">Supprimer définitivement</button>` : ''}</div>`;
                 if(isA) hA += card; else hB += card;
 
-                // SUIVI
                 if(!isA) {
                     let st = getStats(groups[proj]);
-                    let format = (obj) => Object.entries(obj).map(([k, v]) => `• ${k}: <b>${v.toFixed(k.includes('Pose')||k.includes('OFF')?0:2)}</b> ${k.includes('Pose')||k.includes('OFF')?'J':'H'}`).join('<br>') || "Aucun";
+                    let format = (obj) => Object.entries(obj).map(([k, v]) => `• ${k}: <b>${v.toFixed(k.includes('Pige')||k.includes('OFF')?0:2)}</b> ${k.includes('Pige')||k.includes('OFF')?'J':'H'}`).join('<br>') || "Aucun";
                     hS += `<div class="card">
                         <span class="project-title">${proj}</span>
                         <div class="suivi-grid">
@@ -297,7 +304,7 @@
                 txt += "PROJET : " + proj + "\n--------------------------------\n";
                 groups[proj].sort((a, b) => new Date(a.d) - new Date(b.d)).forEach(i => {
                     txt += `${i.d.split('-').reverse().join('/')} | ${i.t} ${i.dur > 0 ? "("+i.dur.toFixed(2)+"h)" : ""}\n`;
-                    txt += `Détail : ${i.hStr}\nPrix   : ${i.val.toFixed(2)}€\n----------------\n`;
+                    txt += `Détail : ${i.hStr}\nPrix    : ${i.val.toFixed(2)}€\n----------------\n`;
                     pTot += i.val;
                 });
                 txt += "TOTAL PROJET : " + pTot.toFixed(2) + "€\n\n\n";
