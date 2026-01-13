@@ -3,130 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V90.1</title>
+    <title>ProTrack V91</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        /* Fenêtre de vue principale */
-        #viewport {
-            width: 100vw;
-            height: calc(100vh - 75px);
-            overflow-x: scroll;
-            overflow-y: hidden;
-            display: flex;
-            scroll-snap-type: x mandatory; /* Force l'arrêt sur les pages */
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Chaque page prend exactement 100% de la largeur du téléphone */
-        .page { 
-            min-width: 100vw; 
-            width: 100vw;
-            height: 100%;
-            overflow-y: auto; 
-            padding: 15px;
-            scroll-snap-align: start; /* Aimante la page au bord */
-        }
-
-        .version-tag { position: absolute; top: 10px; right: 10px; font-size: 11px; color: #3b82f6; font-weight: bold; z-index: 10; }
-        
-        /* Barre de navigation toujours visible en bas */
-        .nav { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0;
-            width: 100%; 
-            height: 75px; 
-            background: #1e293b; 
-            display: flex; 
-            border-top: 1px solid #475569; 
-            z-index: 99999; /* Priorité maximale */
-        }
+        body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
+        .version-tag { position: absolute; top: 10px; right: 10px; font-size: 11px; color: #3b82f6; font-weight: bold; }
+        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: #1e293b; display: flex; border-top: 1px solid #475569; z-index: 9999; }
         .nav-item { flex: 1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; cursor: pointer; text-transform: uppercase; }
         .nav-item.active { color: #3b82f6; border-top: 3px solid #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .page { display: none; padding: 15px; width: 100%; }
         
-        /* Styles habituels */
         .card { background: #1e293b; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
         .card.is-pending { border-left: 6px solid #3b82f6; border-right: 6px solid #3b82f6; }
         .card.is-billed { border: 2px solid #10b981; border-left: 6px solid #10b981; border-right: 6px solid #10b981; background: rgba(16, 185, 129, 0.03); }
+        
         .project-title { color: #facc15; font-size: 20px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 8px; }
+        .label { font-size: 11px; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+
         .input { background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; padding: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; display: block; }
-        .btn { background: #2563eb; color: white; padding: 15px; border-radius: 10px; font-weight: bold; border: none; font-size: 16px; width: 100%; cursor: pointer; }
-        .btn-sec { background: #475569; padding: 10px; font-size: 10px; color: white; border-radius: 6px; text-align: center; font-weight: bold; border: none; flex: 1; cursor: pointer; text-transform: uppercase; }
-        .top-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .icon-btn { background: #1e293b; padding: 10px; border-radius: 10px; font-size: 22px; border: 1px solid #334155; position: relative; }
-        .save-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+        .btn { background: #2563eb; color: white; padding: 15px; border-radius: 10px; font-weight: bold; border: none; font-size: 16px; width: 100%; margin-top: 5px; cursor: pointer; }
+        .btn-sec { background: #475569; padding: 12px 5px; font-size: 10px; color: white; border-radius: 6px; text-align: center; font-weight: bold; flex: 1; border: none; cursor: pointer; text-transform: uppercase; }
+        
+        .row-item { border-bottom: 1px solid #334155; padding: 10px 0; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .flex-row { display: flex; gap: 5px; margin-bottom: 10px; }
-        .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
-        .del-btn { color: #ef4444; border: none; background: none; font-size: 18px; padding-left: 10px; }
-        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:100000; padding:15px; align-items:start; overflow-y: auto; }
-        textarea { background: #0f172a; color: #10b981; border: 1px solid #475569; width: 100%; height: 250px; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 10px; border-radius: 6px; }
+        .flex-row { display: flex; gap: 5px; align-items: center; margin-bottom: 10px; }
+        .del-btn { color: #ef4444; border: none; background: none; font-size: 18px; cursor: pointer; padding-left: 10px; }
+        
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:10000; padding:15px; align-items:start; overflow-y: auto; }
+        textarea { background: #0f172a; color: #10b981; border: 1px solid #475569; width: 100%; height: 300px; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 10px; border-radius: 6px; }
+        .top-bar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .icon-btn { background: #1e293b; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 22px; border: 1px solid #334155; position: relative; }
+        .save-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+
+        /* Suivi V91 */
         .suivi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .suivi-col { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 8px; border: 1px solid #334155; }
-        .btn-validate { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 12px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
+        .suivi-header { font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        .suivi-val { font-size: 13px; line-height: 1.4; color: white; }
+        .suivi-val b { color: #3b82f6; }
+        .btn-validate { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 12px; font-weight: bold; font-size: 11px; margin-top: 10px; width: 100%; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">V90.1</div>
-
-    <div id="viewport">
-        <div id="pg0" class="page">
-            <div class="top-bar">
-                <div class="icon-btn" onclick="openSet()">⚙️</div>
-                <div class="icon-btn" onclick="openSave()">
-                    💾<span id="save-counter" class="save-badge">0</span>
-                </div>
+    <div id="pg0" class="page" style="display:block;">
+        <div class="version-tag">V91</div>
+        <div class="top-bar">
+            <div class="icon-btn" onclick="openSet()">⚙️</div>
+            <div class="icon-btn" onclick="openSave()">
+                💾<span id="save-counter" class="save-badge">0</span>
             </div>
-            <div class="card">
-                <div class="grid"><input type="date" id="in-date" class="input"><input type="text" id="in-proj" placeholder="PROJET" class="input" list="proj-list" autocomplete="off"></div>
+        </div>
+        <div class="card">
+            <div class="grid">
+                <input type="date" id="in-date" class="input">
+                <input type="text" id="in-proj" placeholder="NOM DU PROJET" class="input" list="proj-list" autocomplete="off">
                 <datalist id="proj-list"></datalist>
-                <select id="in-type" class="input">
-                    <option value="Production">Production</option>
-                    <option value="Trajet">Trajet</option>
-                    <option value="Pose Piges">Pose Piges</option>
-                    <option value="Pose Omnes">Pose Omnes</option>
-                    <option value="Jours OFF">Jours OFF</option>
-                </select>
-                <div class="label">Matin</div>
-                <div class="flex-row"><input type="time" id="s1" class="input"><input type="time" id="e1" class="input"></div>
-                <div class="label">Après-midi</div>
-                <div class="flex-row"><input type="time" id="s2" class="input"><input type="time" id="e2" class="input"></div>
-                <button class="btn" onclick="addItem()">ENREGISTRER</button>
             </div>
-            <div id="recent-list"></div>
+            <select id="in-type" class="input">
+                <option value="Production">Production</option>
+                <option value="Trajet">Trajet</option>
+                <option value="Pose Piges">Pose Piges</option>
+                <option value="Pose Omnes">Pose Omnes</option>
+                <option value="Jours OFF">Jours OFF</option>
+            </select>
+            <div class="label">Matin</div>
+            <div class="flex-row"><input type="time" id="s1" class="input"><input type="time" id="e1" class="input"></div>
+            <div class="label">Après-midi</div>
+            <div class="flex-row"><input type="time" id="s2" class="input"><input type="time" id="e2" class="input"></div>
+            <button class="btn" onclick="addItem()">ENREGISTRER</button>
         </div>
+        <div id="recent-list"></div>
+    </div>
 
-        <div id="pg1" class="page">
-            <div class="grid" style="margin-bottom:15px;">
-                <div class="card" style="margin:0; text-align:center;"><div class="label">À Facturer</div><div id="sum-af" style="font-weight:bold; color:#ef4444;">0€</div></div>
-                <div class="card" style="margin:0; text-align:center;"><div class="label">Facturé</div><div id="sum-f" style="font-weight:bold; color:#10b981;">0€</div></div>
-            </div>
-            <div id="list-bilan"></div>
+    <div id="pg1" class="page">
+        <div class="grid" style="margin-bottom:15px;">
+            <div class="card" style="margin:0; text-align:center;"><div class="label">À Facturer</div><div id="sum-af" style="font-size:18px; font-weight:bold; color:#ef4444;">0€</div></div>
+            <div class="card" style="margin:0; text-align:center;"><div class="label" style="color:#10b981;">Facturé</div><div id="sum-f" style="font-size:18px; font-weight:bold; color:#10b981;">0€</div></div>
         </div>
+        <div id="list-bilan"></div>
+    </div>
 
-        <div id="pg3" class="page">
-            <div id="list-suivi"></div>
-        </div>
+    <div id="pg3" class="page">
+        <div id="list-suivi"></div>
+    </div>
 
-        <div id="pg2" class="page">
-            <div id="list-archive"></div>
-        </div>
+    <div id="pg2" class="page">
+        <div id="list-archive"></div>
     </div>
 
     <div class="nav">
         <div id="nv0" class="nav-item active" onclick="go(0)">Saisie</div>
         <div id="nv1" class="nav-item" onclick="go(1)">Bilan</div>
-        <div id="nv3" class="nav-item" onclick="go(2)">Suivi</div>
-        <div id="nv2" class="nav-item" onclick="go(3)">Archives</div>
+        <div id="nv3" class="nav-item" onclick="go(3)">Suivi</div>
+        <div id="nv2" class="nav-item" onclick="go(2)">Archives</div>
     </div>
 
-    <div id="set-modal" class="modal"><div class="card" style="width:100%;"><h3>TARIFS</h3><div id="price-inputs"></div><button class="btn" onclick="closeSet()">FERMER</button></div></div>
+    <div id="set-modal" class="modal"><div class="card" style="width:100%; margin-top:20px;"><h3>TARIFS</h3><div id="price-inputs"></div><button class="btn" onclick="closeSet()">FERMER</button></div></div>
     <div id="save-modal" class="modal">
-        <div class="card" style="width:100%;">
+        <div class="card" style="width:100%; margin-top:20px;">
             <h3>EXPORT TEXTE</h3>
             <select id="export-choice" class="input"></select>
             <button class="btn" style="background:#10b981;" onclick="generatePrintable()">GÉNÉRER LE TEXTE</button>
@@ -144,20 +119,15 @@
         var archived = JSON.parse(localStorage.getItem('P69S_ARCH') || '[]');
         var rates = JSON.parse(localStorage.getItem('P69S_RT')) || { prod: 25, trajet: 20, piges: 350, omnes: 300, off: 100 };
         var lastSave = localStorage.getItem('P69S_LSAVE') || new Date().getTime();
-        
-        const viewport = document.getElementById('viewport');
-        const navItems = ['nv0', 'nv1', 'nv3', 'nv2'];
-
-        // Met à jour la navigation pendant le glissement
-        viewport.addEventListener('scroll', () => {
-            let index = Math.round(viewport.scrollLeft / window.innerWidth);
-            navItems.forEach((id, i) => {
-                document.getElementById(id).className = (i === index) ? 'nav-item active' : 'nav-item';
-            });
-        });
 
         function go(n) {
-            viewport.scrollTo({ left: n * window.innerWidth, behavior: 'smooth' });
+            var pgs = ['pg0', 'pg1', 'pg2', 'pg3'];
+            var nvs = [0, 1, 2, 3];
+            pgs.forEach((pg, i) => {
+                document.getElementById(pg).style.display = (pg === 'pg'+n) ? 'block' : 'none';
+                document.getElementById('nv' + nvs[i]).className = (nvs[i] === n) ? 'nav-item active' : 'nav-item';
+            });
+            draw();
         }
 
         function toM(v) { if(!v) return -1; var s = v.split(':'); return parseInt(s[0])*60+parseInt(s[1]); }
@@ -172,15 +142,16 @@
             var s2=toM(document.getElementById('s2').value), e2=toM(document.getElementById('e2').value);
             
             var newItem = { id: new Date().getTime(), d: d, p: p, t: t, noted: false };
+
             if(t.indexOf('Pose') > -1 || t === 'Jours OFF') {
                 newItem.val = (t==='Pose Piges') ? rates.piges : (t==='Pose Omnes' ? rates.omnes : rates.off);
-                newItem.dur = 0; newItem.hStr = t;
+                newItem.hStr = t; newItem.dur = 0;
             } else {
                 function diff(a, b) { if(a === -1 || b === -1) return 0; let r = b - a; return r < 0 ? r + 1440 : r; }
                 newItem.dur = (diff(s1, e1) + diff(s2, e2)) / 60;
                 if(newItem.dur <= 0) return;
                 newItem.val = newItem.dur * (t==='Production' ? rates.prod : rates.trajet);
-                newItem.hStr = (s1>-1?document.getElementById('s1').value:'')+'-'+(e2>-1?document.getElementById('e2').value:'');
+                newItem.hStr = (s1>-1?document.getElementById('s1').value:'') + '-' + (e2>-1?document.getElementById('e2').value:'');
             }
             db.unshift(newItem);
             localStorage.setItem('P69S_DATA', JSON.stringify(db));
@@ -201,10 +172,10 @@
                 var totVal = 0, lines = "";
                 groups[proj].sort((a, b) => new Date(a.d) - new Date(b.d)).forEach(it => {
                     totVal += it.val;
-                    lines += `<div class="row-item"><div><b>${it.d.split('-').reverse().join('/')}</b> | ${it.t}</div><div style="display:flex; justify-content:space-between; font-size:12px;"><span>${it.dur>0?it.dur.toFixed(2)+'H':''}</span><b>${it.val.toFixed(2)}€</b><button class="del-btn" onclick="del(${it.id})">🗑️</button></div></div>`;
+                    lines += `<div class="row-item"><div style="display:flex; justify-content:space-between; align-items:start;"><div><b>${it.d.split('-').reverse().join('/')}</b><br><small>${it.t} ${it.dur>0?it.dur.toFixed(2)+'H':''}</small></div><div style="text-align:right;"><b>${it.val.toFixed(2)}€</b><button class="del-btn" onclick="del(${it.id})">🗑️</button></div></div></div>`;
                 });
                 if(!isA) { isB ? tF += totVal : tAF += totVal; }
-                var card = `<div class="card ${isB ? 'is-billed' : 'is-pending'}"><span class="project-title">${proj}</span><b>${totVal.toFixed(2)}€</b>${lines}<div class="grid" style="margin-top:10px;"><button class="btn-sec" onclick="tB('${proj}')">STATUT</button><button class="btn-sec" onclick="tA('${proj}')">ARCHIVE</button></div></div>`;
+                var card = `<div class="card ${isB ? 'is-billed' : 'is-pending'}"><span class="project-title">${proj}</span><b>TOTAL : ${totVal.toFixed(2)}€</b>${lines}<div class="grid" style="margin-top:15px;"><button class="btn-sec" onclick="tB('${proj}')">STATUT</button><button class="btn-sec" onclick="tA('${proj}')">ARCHIVE</button></div></div>`;
                 isA ? hA += card : hB += card;
 
                 if(!isA) {
@@ -214,15 +185,15 @@
                         if(i.noted) { isH ? dH+=i.dur : dJ++; } else { isH ? aH+=i.dur : aJ++; }
                     });
                     hS += `<div class="card"><span class="project-title">${proj}</span><div class="suivi-grid">
-                        <div class="suivi-col"><div class="label">À Saisir</div><b>${aH.toFixed(2)}H</b><br><b>${aJ}J</b></div>
-                        <div class="suivi-col"><div class="label">Fait</div><b>${dH.toFixed(2)}H</b><br><b>${dJ}J</b></div>
+                        <div class="suivi-col"><div class="suivi-header">À SAISIR</div><div class="suivi-val"><b>${aH.toFixed(2)}</b> H<br><b>${aJ}</b> Jours</div></div>
+                        <div class="suivi-col"><div class="suivi-header">DÉJÀ SAISI</div><div class="suivi-val"><b>${dH.toFixed(2)}</b> H<br><b>${dJ}</b> Jours</div></div>
                     </div><button class="btn-validate" onclick="markNoted('${proj}', true)">VALIDER TRANSFERT</button>
-                    ${dH+dJ > 0 ? `<button class="btn-sec" style="margin-top:5px; width:100%" onclick="markNoted('${proj}', false)">ANNULER</button>` : ''}</div>`;
+                    ${dH+dJ > 0 ? `<button class="btn-sec" style="margin-top:5px; width:100%" onclick="markNoted('${proj}', false)">ANNULER TRANSFERT</button>` : ''}</div>`;
                 }
             }
-            document.getElementById('list-bilan').innerHTML = hB || "Vide";
-            document.getElementById('list-archive').innerHTML = hA || "Vide";
-            document.getElementById('list-suivi').innerHTML = hS || "Vide";
+            document.getElementById('list-bilan').innerHTML = hB || "Aucun projet.";
+            document.getElementById('list-archive').innerHTML = hA || "Aucune archive.";
+            document.getElementById('list-suivi').innerHTML = hS || "Aucun projet actif.";
             document.getElementById('sum-af').innerText = tAF.toFixed(2) + "€";
             document.getElementById('sum-f').innerText = tF.toFixed(2) + "€";
         }
@@ -232,14 +203,14 @@
             localStorage.setItem('P69S_DATA', JSON.stringify(db)); draw();
         };
 
-        window.tB = function(p) { billed.includes(p) ? billed = billed.filter(x => x!==p) : billed.push(p); localStorage.setItem('P69S_BILL', JSON.stringify(billed)); draw(); };
-        window.tA = function(p) { archived.includes(p) ? archived = archived.filter(x => x!==p) : archived.push(p); localStorage.setItem('P69S_ARCH', JSON.stringify(archived)); draw(); };
+        window.tB = function(p) { if(billed.includes(p)) billed = billed.filter(x => x!==p); else billed.push(p); localStorage.setItem('P69S_BILL', JSON.stringify(billed)); draw(); };
+        window.tA = function(p) { if(archived.includes(p)) archived = archived.filter(x => x!==p); else archived.push(p); localStorage.setItem('P69S_ARCH', JSON.stringify(archived)); draw(); };
         function del(id) { if(confirm("Supprimer ?")) { db = db.filter(o => o.id !== id); localStorage.setItem('P69S_DATA', JSON.stringify(db)); draw(); } }
         function openSet() { document.getElementById('set-modal').style.display = 'flex'; }
         function closeSet() { localStorage.setItem('P69S_RT', JSON.stringify(rates)); document.getElementById('set-modal').style.display = 'none'; draw(); }
         function openSave() { document.getElementById('save-modal').style.display = 'flex'; }
         function closeSave() { document.getElementById('save-modal').style.display = 'none'; }
-        function copyToClipboard() { document.getElementById("backup-zone").select(); document.execCommand("copy"); alert("Copié"); }
+        function copyToClipboard() { document.getElementById("backup-zone").select(); document.execCommand("copy"); alert("Copié !"); }
         function updateSaveCounter() { document.getElementById('save-counter').innerText = Math.floor((new Date().getTime() - lastSave) / 86400000); }
 
         document.getElementById('in-date').valueAsDate = new Date();
