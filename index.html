@@ -3,49 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V89 - RESTAURÉE</title>
+    <title>ProTrack V89-RESTORATION</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
         .version-tag { position: absolute; top: 10px; right: 10px; font-size: 11px; color: #3b82f6; font-weight: bold; }
         .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: #1e293b; display: flex; border-top: 1px solid #475569; z-index: 9999; }
-        .nav-item { flex: 1; color: #64748b; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; cursor: pointer; }
+        .nav-item { flex: 1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; cursor: pointer; text-transform: uppercase; }
         .nav-item.active { color: #3b82f6; border-top: 3px solid #3b82f6; background: rgba(59, 130, 246, 0.1); }
         .page { display: none; padding: 15px; width: 100%; }
-        
         .card { background: #1e293b; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
         .card.is-pending { border-left: 6px solid #3b82f6; border-right: 6px solid #3b82f6; }
         .card.is-billed { border: 2px solid #10b981; border-left: 6px solid #10b981; border-right: 6px solid #10b981; background: rgba(16, 185, 129, 0.03); }
-        
         .project-title { color: #facc15; font-size: 20px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 8px; }
         .label { font-size: 11px; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-
         .input { background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; padding: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; display: block; }
         .btn { background: #2563eb; color: white; padding: 15px; border-radius: 10px; font-weight: bold; border: none; font-size: 16px; width: 100%; margin-top: 5px; cursor: pointer; }
         .btn-sec { background: #475569; padding: 12px 5px; font-size: 10px; color: white; border-radius: 6px; text-align: center; font-weight: bold; flex: 1; border: none; cursor: pointer; text-transform: uppercase; }
-        
         .row-item { border-bottom: 1px solid #334155; padding: 10px 0; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .flex-row { display: flex; gap: 5px; align-items: center; margin-bottom: 10px; }
         .del-btn { color: #ef4444; border: none; background: none; font-size: 18px; cursor: pointer; padding-left: 10px; }
-        
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:10000; padding:15px; align-items:start; overflow-y: auto; }
         textarea { background: #0f172a; color: #10b981; border: 1px solid #475569; width: 100%; height: 250px; font-family: monospace; font-size: 11px; padding: 10px; margin-top: 10px; border-radius: 6px; }
         .top-bar { display: flex; gap: 10px; margin-bottom: 15px; }
         .icon-btn { background: #1e293b; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 22px; border: 1px solid #334155; position: relative; }
         .save-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
-
         .suivi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .suivi-col { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 8px; border: 1px solid #334155; }
-        .suivi-header { font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
-        .suivi-val { font-size: 13px; line-height: 1.4; color: white; }
         .btn-validate { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 12px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="pg0" class="page" style="display:block;">
-        <div class="version-tag">V89-R</div>
+        <div class="version-tag">V89-FIX</div>
         <div class="top-bar">
             <div class="icon-btn" onclick="openSet()">⚙️</div>
             <div class="icon-btn" onclick="openSave()">
@@ -95,9 +87,9 @@
     <div id="set-modal" class="modal"><div class="card" style="width:100%; margin-top:20px;"><h3>TARIFS</h3><div id="price-inputs"></div><button class="btn" onclick="closeSet()">FERMER</button></div></div>
     <div id="save-modal" class="modal">
         <div class="card" style="width:100%; margin-top:20px;">
-            <h3>EXPORT TEXTE</h3>
+            <h3>SAUVEGARDE / EXPORT</h3>
             <select id="export-choice" class="input"></select>
-            <button class="btn" style="background:#10b981; margin-bottom:10px" onclick="generatePrintable()">GÉNÉRER LE TEXTE</button>
+            <button class="btn" style="background:#10b981; margin-bottom:10px" onclick="generatePrintable()">GÉNÉRER TEXTE</button>
             <textarea id="backup-zone" readonly></textarea>
             <div class="grid" style="margin-top:10px;">
                 <button class="btn-sec" style="background:#3b82f6;" onclick="copyToClipboard()">COPIER</button>
@@ -107,28 +99,39 @@
     </div>
 
     <script>
-        // --- SCRIPT DE RÉCUPÉRATION DE DONNÉES ---
-        function restoreData() {
-            const keys = ['P69S_DATA', 'PROTRACK_DATA', 'PT_DATA'];
-            let found = [];
+        // --- MOTEUR DE RÉCUPÉRATION CRITIQUE ---
+        function getStableData() {
+            // Liste de toutes les clés de stockage utilisées depuis la V60
+            const keys = ['P69S_DATA', 'PROTRACK_DATA', 'PT_DATA', 'P69_DATA'];
+            let masterList = [];
+            
             keys.forEach(k => {
-                let d = localStorage.getItem(k);
-                if (d) {
-                    let parsed = JSON.parse(d);
-                    if (Array.isArray(parsed)) found = found.concat(parsed);
+                let raw = localStorage.getItem(k);
+                if (raw) {
+                    try {
+                        let parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) masterList = masterList.concat(parsed);
+                    } catch(e) { console.error("Erreur clé:", k); }
                 }
             });
-            // Supprimer les doublons par ID
-            let unique = Array.from(new Map(found.map(item => [item.id, item])).values());
-            // Trier par date décroissante
-            unique.sort((a,b) => b.id - a.id);
-            return unique;
+
+            // Nettoyage : Retire les doublons (basé sur l'ID unique du timestamp)
+            let cleanMap = new Map();
+            masterList.forEach(item => {
+                if(item && item.id) cleanMap.set(item.id, item);
+            });
+            
+            let finalData = Array.from(cleanMap.values());
+            finalData.sort((a,b) => b.id - a.id); // Plus récent en haut
+            
+            // On sauvegarde immédiatement dans la clé principale pour fixer le problème
+            if (finalData.length > 0) {
+                localStorage.setItem('P69S_DATA', JSON.stringify(finalData));
+            }
+            return finalData;
         }
 
-        var db = restoreData();
-        // Sauvegarder immédiatement sous le nom définitif pour stabiliser
-        localStorage.setItem('P69S_DATA', JSON.stringify(db));
-
+        var db = getStableData();
         var billed = JSON.parse(localStorage.getItem('P69S_BILL') || '[]');
         var archived = JSON.parse(localStorage.getItem('P69S_ARCH') || '[]');
         var rates = JSON.parse(localStorage.getItem('P69S_RT')) || { prod: 25, trajet: 20, piges: 350, omnes: 300, off: 100 };
@@ -151,13 +154,12 @@
             var newItem = { id: new Date().getTime(), d: d, p: p, t: t, noted: false };
             if(t.indexOf('Pose') > -1 || t === 'Jours OFF') {
                 newItem.val = (t==='Pose Piges') ? rates.piges : (t==='Pose Omnes' ? rates.omnes : rates.off);
-                newItem.hStr = t; newItem.dur = 0;
+                newItem.dur = 0;
             } else {
                 function diff(a, b) { if(a === -1 || b === -1) return 0; let r = b - a; return r < 0 ? r + 1440 : r; }
                 newItem.dur = (diff(s1, e1) + diff(s2, e2)) / 60;
                 if(newItem.dur <= 0) return;
                 newItem.val = newItem.dur * (t==='Production' ? rates.prod : rates.trajet);
-                newItem.hStr = (s1>-1?document.getElementById('s1').value:'') + '-' + (e2>-1?document.getElementById('e2').value:'');
             }
             db.unshift(newItem); localStorage.setItem('P69S_DATA', JSON.stringify(db));
             ['in-proj','s1','e1','s2','e2'].forEach(id => document.getElementById(id).value = ""); draw();
@@ -166,8 +168,11 @@
         function draw() {
             var plist = [...new Set(db.map(o => o.p))];
             document.getElementById('proj-list').innerHTML = plist.map(x => `<option value="${x}">`).join('');
+            
+            // Liste des 3 derniers ajouts sur la page d'accueil
             var rec = ""; for(var r=0; r<Math.min(db.length, 3); r++){ var o = db[r]; rec += `<div class="card" style="font-size:11px; margin-bottom:10px;"><b>${o.p}</b><span style="float:right;">${o.val.toFixed(2)}€</span><br><span>${o.d.split('-').reverse().join('/')}</span></div>`; }
             document.getElementById('recent-list').innerHTML = rec;
+
             var hB="", hA="", hS="", tAF=0, tF=0, groups = {};
             db.forEach(it => { groups[it.p] = groups[it.p] || []; groups[it.p].push(it); });
             for (var proj in groups) {
@@ -179,17 +184,22 @@
                 if(!isA) { isB ? tF += totVal : tAF += totVal; }
                 var card = `<div class="card ${isB ? 'is-billed' : 'is-pending'}"><span class="project-title">${proj}</span><b>TOTAL : ${totVal.toFixed(2)}€</b>${lines}<div class="grid" style="margin-top:10px;"><button class="btn-sec" onclick="tB('${proj}')">STATUT</button><button class="btn-sec" onclick="tA('${proj}')">ARCHIVE</button></div></div>`;
                 isA ? hA += card : hB += card;
+                
+                // Page Suivi
                 if(!isA) {
-                    let aH=0, aJ=0, dH=0, dJ=0;
-                    groups[proj].forEach(i => { if(i.noted) { i.dur > 0 ? dH+=i.dur : dJ++; } else { i.dur > 0 ? aH+=i.dur : aJ++; } });
+                    let aH=0, dH=0;
+                    groups[proj].forEach(i => { if(i.noted) dH+=i.dur; else aH+=i.dur; });
                     hS += `<div class="card"><span class="project-title">${proj}</span><div class="suivi-grid">
                         <div class="suivi-col"><div class="label">À SAISIR</div><b>${aH.toFixed(2)}H</b></div>
                         <div class="suivi-col"><div class="label">FAIT</div><b>${dH.toFixed(2)}H</b></div>
                     </div><button class="btn-validate" onclick="markNoted('${proj}', true)">VALIDER</button></div>`;
                 }
             }
-            document.getElementById('list-bilan').innerHTML = hB || "Vide"; document.getElementById('list-archive').innerHTML = hA || "Vide"; document.getElementById('list-suivi').innerHTML = hS || "Vide";
-            document.getElementById('sum-af').innerText = tAF.toFixed(2) + "€"; document.getElementById('sum-f').innerText = tF.toFixed(2) + "€";
+            document.getElementById('list-bilan').innerHTML = hB || "Vide";
+            document.getElementById('list-archive').innerHTML = hA || "Vide";
+            document.getElementById('list-suivi').innerHTML = hS || "Vide";
+            document.getElementById('sum-af').innerText = tAF.toFixed(2) + "€";
+            document.getElementById('sum-f').innerText = tF.toFixed(2) + "€";
         }
 
         window.markNoted = function(proj, s) { db.forEach(it => { if(it.p === proj) it.noted = s; }); localStorage.setItem('P69S_DATA', JSON.stringify(db)); draw(); };
@@ -204,7 +214,7 @@
         function openSave() { 
             let sel = document.getElementById('export-choice');
             let projs = [...new Set(db.map(it => it.p))];
-            let opt = '<option value="ALL">TOUS LES PROJETS</option>';
+            let opt = '<option value="ALL">TOUS</option>';
             projs.forEach(p => opt += `<option value="${p}">${p}</option>`);
             sel.innerHTML = opt; document.getElementById('save-modal').style.display = 'flex'; 
         }
@@ -212,7 +222,7 @@
         function generatePrintable() {
             let choice = document.getElementById('export-choice').value;
             let txt = "--- RÉCAP ---\n\n";
-            db.filter(it => choice === "ALL" || it.p === choice).forEach(i => { txt += `${i.d} | ${i.p} | ${i.val.toFixed(2)}€\n`; });
+            db.filter(it => choice === "ALL" || it.p === choice).sort((a,b)=>new Date(a.d)-new Date(b.d)).forEach(i => { txt += `${i.d} | ${i.p} | ${i.val.toFixed(2)}€\n`; });
             document.getElementById('backup-zone').value = txt; 
         }
         function copyToClipboard() { document.getElementById("backup-zone").select(); document.execCommand("copy"); alert("Copié"); }
