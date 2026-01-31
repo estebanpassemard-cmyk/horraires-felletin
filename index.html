@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V93 • CLOUD FIX</title>
+    <title>ProTrack V94 • CLOUD FINAL</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
@@ -42,7 +42,7 @@
 <body>
 
     <div id="pg0" class="page" style="display:block;">
-        <div class="version-tag">V93 • CLOUD CONNECTÉ</div>
+        <div class="version-tag">V94 • CLOUD OPTIMISÉ</div>
         <div class="top-bar">
             <div class="icon-btn" onclick="openSet()">⚙️</div>
             <div class="icon-btn" onclick="openSave()">
@@ -97,8 +97,8 @@
             <h3>RÉGLAGES & CLOUD</h3>
             <div id="price-inputs"></div>
             <hr style="border:0; border-top:1px solid #475569; margin:15px 0;">
-            <button class="btn" style="background:#10b981;" onclick="syncAllToCloud()">SYNCHRONISER L'HISTORIQUE</button>
-            <p style="font-size:10px; color:#94a3b8; text-align:center;">Envoie vos données actuelles vers Google Sheets.</p>
+            <button id="btn-sync" class="btn" style="background:#10b981;" onclick="syncAllToCloud()">SYNCHRONISER TOUT L'HISTORIQUE</button>
+            <p id="sync-status" style="font-size:10px; color:#94a3b8; text-align:center;">Envoie vos données vers Sheets.</p>
             <button class="btn" style="background:#475569; margin-top:10px;" onclick="closeSet()">FERMER</button>
         </div>
     </div>
@@ -114,8 +114,8 @@
     </div>
 
     <script>
-        // NOUVELLE URL MISE À JOUR
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjaDr7UUd0Iei1-hzN4g1BnHfocaq6UKqBbSd-S6cD34_hfBE049dy_i-iFVPBTnt3/exec"; 
+        // URL MISE À JOUR
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMyxNPx2tdPV7mlXJxARd6M1WI0U4B1lPlRY1AM-kcuKgQ83gIA4O1P_o3kZpcWece/exec"; 
 
         var db = JSON.parse(localStorage.getItem('P69S_DATA') || '[]');
         var billed = JSON.parse(localStorage.getItem('P69S_BILL') || '[]');
@@ -134,11 +134,24 @@
             fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(item) }).catch(e => console.log("Cloud Error"));
         }
 
-        function syncAllToCloud() {
-            if(db.length === 0) { alert("Aucune donnée à synchroniser."); return; }
-            if(confirm("Envoyer vos " + db.length + " lignes vers Google Sheets ?")) {
-                db.forEach(item => sendToCloud(item));
-                alert("Envoi en cours...");
+        async function syncAllToCloud() {
+            if(db.length === 0) { alert("Aucune donnée."); return; }
+            if(confirm("Envoyer vos " + db.length + " lignes vers Google Sheets ? (L'envoi sera progressif)")) {
+                const btn = document.getElementById('btn-sync');
+                const status = document.getElementById('sync-status');
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                
+                for (let i = 0; i < db.length; i++) {
+                    status.innerText = "Envoi : " + (i+1) + " / " + db.length;
+                    sendToCloud(db[i]);
+                    await new Promise(r => setTimeout(r, 400)); // Pause de 400ms pour éviter le blocage Google
+                }
+                
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                status.innerText = "Synchronisation terminée !";
+                alert("Terminé ! Vérifiez votre Google Sheet.");
             }
         }
 
