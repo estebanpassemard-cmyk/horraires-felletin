@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V93 • CLOUD TOTAL</title>
+    <title>ProTrack V93 • CLOUD FIX</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
@@ -42,7 +42,7 @@
 <body>
 
     <div id="pg0" class="page" style="display:block;">
-        <div class="version-tag">V93 • CLOUD OK</div>
+        <div class="version-tag">V93 • CLOUD CONNECTÉ</div>
         <div class="top-bar">
             <div class="icon-btn" onclick="openSet()">⚙️</div>
             <div class="icon-btn" onclick="openSave()">
@@ -94,13 +94,12 @@
 
     <div id="set-modal" class="modal">
         <div class="card" style="width:100%; margin-top:20px;">
-            <h3>RÉGLAGES & TARIFS</h3>
+            <h3>RÉGLAGES & CLOUD</h3>
             <div id="price-inputs"></div>
             <hr style="border:0; border-top:1px solid #475569; margin:15px 0;">
-            <div class="label" style="color:#10b981;">Cloud Management</div>
-            <button class="btn" style="background:#059669; font-size:12px;" onclick="syncAllToCloud()">SYNCHRONISER TOUT L'HISTORIQUE</button>
-            <p style="font-size:10px; color:#94a3b8; margin-top:5px;">Envoie toutes les données locales vers Google Sheet.</p>
-            <button class="btn" style="background:#475569; margin-top:20px;" onclick="closeSet()">FERMER</button>
+            <button class="btn" style="background:#10b981;" onclick="syncAllToCloud()">SYNCHRONISER L'HISTORIQUE</button>
+            <p style="font-size:10px; color:#94a3b8; text-align:center;">Envoie vos données actuelles vers Google Sheets.</p>
+            <button class="btn" style="background:#475569; margin-top:10px;" onclick="closeSet()">FERMER</button>
         </div>
     </div>
 
@@ -115,7 +114,8 @@
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ57kGO1bBQNPsX1Hv6qIWei8PtPiUCsJPJiV8fPvHJ_gTwSBakE_DPT00Bhjk5wTT/exec"; 
+        // NOUVELLE URL MISE À JOUR
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjaDr7UUd0Iei1-hzN4g1BnHfocaq6UKqBbSd-S6cD34_hfBE049dy_i-iFVPBTnt3/exec"; 
 
         var db = JSON.parse(localStorage.getItem('P69S_DATA') || '[]');
         var billed = JSON.parse(localStorage.getItem('P69S_BILL') || '[]');
@@ -131,13 +131,14 @@
 
         function sendToCloud(item) {
             if(!GOOGLE_SCRIPT_URL) return;
-            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(item) }).catch(e => console.log("Offline"));
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(item) }).catch(e => console.log("Cloud Error"));
         }
 
         function syncAllToCloud() {
-            if(confirm("Cela va envoyer vos " + db.length + " lignes vers Google Sheets. Continuer ?")) {
+            if(db.length === 0) { alert("Aucune donnée à synchroniser."); return; }
+            if(confirm("Envoyer vos " + db.length + " lignes vers Google Sheets ?")) {
                 db.forEach(item => sendToCloud(item));
-                alert("Synchronisation lancée ! Les données vont apparaître progressivement sur votre feuille.");
+                alert("Envoi en cours...");
             }
         }
 
