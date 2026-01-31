@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ProTrack V94 • CLOUD FINAL</title>
+    <title>ProTrack V95 • FINAL FIX</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; }
@@ -42,7 +42,7 @@
 <body>
 
     <div id="pg0" class="page" style="display:block;">
-        <div class="version-tag">V94 • CLOUD OPTIMISÉ</div>
+        <div class="version-tag">V95 • FINAL FIX</div>
         <div class="top-bar">
             <div class="icon-btn" onclick="openSet()">⚙️</div>
             <div class="icon-btn" onclick="openSave()">
@@ -82,8 +82,14 @@
         </div>
         <div id="list-bilan"></div>
     </div>
-    <div id="pg3" class="page"><div id="list-suivi"></div></div>
-    <div id="pg2" class="page"><div id="list-archive"></div></div>
+
+    <div id="pg3" class="page">
+        <div id="list-suivi"></div>
+    </div>
+
+    <div id="pg2" class="page">
+        <div id="list-archive"></div>
+    </div>
 
     <div class="nav">
         <div id="nv0" class="nav-item active" onclick="go(0)"><span>Saisie</span></div>
@@ -114,7 +120,6 @@
     </div>
 
     <script>
-        // URL MISE À JOUR
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMyxNPx2tdPV7mlXJxARd6M1WI0U4B1lPlRY1AM-kcuKgQ83gIA4O1P_o3kZpcWece/exec"; 
 
         var db = JSON.parse(localStorage.getItem('P69S_DATA') || '[]');
@@ -123,7 +128,23 @@
         var rates = JSON.parse(localStorage.getItem('P69S_RT')) || { prod: 25, trajet: 20, piges: 350, omnes: 300, off: 100 };
         var lastSave = localStorage.getItem('P69S_LSAVE') || new Date().getTime();
 
-        function go(n) { document.querySelectorAll('.page').forEach((p, i) => p.style.display = i==n?'block':'none'); document.querySelectorAll('.nav-item').forEach((nv, i) => nv.className = i==n?'nav-item active':'nav-item'); updateSaveCounter(); draw(); }
+        function go(n) { 
+            // Masque toutes les pages
+            document.getElementById('pg0').style.display = 'none';
+            document.getElementById('pg1').style.display = 'none';
+            document.getElementById('pg2').style.display = 'none';
+            document.getElementById('pg3').style.display = 'none';
+            // Affiche la bonne
+            document.getElementById('pg' + n).style.display = 'block';
+            
+            // Met à jour la classe active sur la nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nv' + n).classList.add('active');
+            
+            updateSaveCounter(); 
+            draw(); 
+        }
+
         function updateSaveCounter() { var d = Math.floor((new Date().getTime()-lastSave)/(864e5)); var b = document.getElementById('save-counter'); b.innerText = d; b.style.background = d>=7?"#ef4444":(d>=3?"#f59e0b":"#3b82f6"); }
         function checkType() { document.getElementById('bloc-demi').style.display = document.getElementById('in-type').value.includes('Pige') ? 'flex' : 'none'; }
         function toggleLong() { document.getElementById('bloc3').style.display = document.getElementById('check-long').checked ? 'block' : 'none'; }
@@ -141,15 +162,12 @@
                 const status = document.getElementById('sync-status');
                 btn.disabled = true;
                 btn.style.opacity = "0.5";
-                
                 for (let i = 0; i < db.length; i++) {
                     status.innerText = "Envoi : " + (i+1) + " / " + db.length;
                     sendToCloud(db[i]);
-                    await new Promise(r => setTimeout(r, 400)); // Pause de 400ms pour éviter le blocage Google
+                    await new Promise(r => setTimeout(r, 400));
                 }
-                
-                btn.disabled = false;
-                btn.style.opacity = "1";
+                btn.disabled = false; btn.style.opacity = "1";
                 status.innerText = "Synchronisation terminée !";
                 alert("Terminé ! Vérifiez votre Google Sheet.");
             }
